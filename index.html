@@ -37,41 +37,66 @@
         </div>
     </div>
 
-    <script>
-        function handleUpload() {
-            const loader = document.getElementById('loading');
-            loader.classList.remove('hidden');
+   <script>
+    async function handleUpload() {
+        const fileInput = document.getElementById('resumeInput');
+        const loader = document.getElementById('loading');
+        
+        if (!fileInput.files[0]) return;
+        
+        loader.classList.remove('hidden');
+        const file = fileInput.files[0];
+        const reader = new FileReader();
 
-            // Simulate Cloud AI Processing
-            setTimeout(() => {
-                const mockData = {
-                    name: "PRANAV MASATKAR",
-                    title: "AI Engineer & Student at GHRCE",
-                    skills: ["Python", "TensorFlow", "Cloud Computing", "NLP", "SQL"],
-                    projects: ["NLP Chatbot (BERT)", "Face Recognition System", "Disaster Preparedness Platform"]
-                };
+        reader.onload = function(e) {
+            const text = e.target.result;
+            
+            // LOGIC: This is a simple 'Parser' that looks for data in the text
+            const extractedData = {
+                name: "User Detected", // Default if not found
+                title: "Professional Profile",
+                skills: [],
+                projects: []
+            };
 
-                displayPortfolio(mockData);
-            }, 2000);
-        }
-
-        function displayPortfolio(data) {
-            document.getElementById('upload-zone').classList.add('hidden');
-            document.getElementById('portfolio-output').classList.remove('hidden');
-
-            document.getElementById('out-name').innerText = data.name;
-            document.getElementById('out-title').innerText = data.title;
-
-            const skillDiv = document.getElementById('out-skills');
-            data.skills.forEach(s => {
-                skillDiv.innerHTML += `<span class="bg-slate-700 px-3 py-1 rounded-md border border-sky-500/30 text-sky-400 text-sm">${s}</span>`;
+            // Basic AI simulation: Splitting text to find details
+            const lines = text.split('\n');
+            
+            // Grab the first line as the Name
+            if(lines[0]) extractedData.name = lines[0].toUpperCase();
+            
+            // Search for Skills (Simple Keyword matching)
+            const commonSkills = ["Python", "Java", "SQL", "C++", "React", "AI", "Machine Learning", "Cloud"];
+            commonSkills.forEach(skill => {
+                if(text.toLowerCase().includes(skill.toLowerCase())) {
+                    extractedData.skills.push(skill);
+                }
             });
 
-            const projDiv = document.getElementById('out-projects');
-            data.projects.forEach(p => {
-                projDiv.innerHTML += `<div class="bg-slate-900/50 p-3 rounded border-l-4 border-sky-500">${p}</div>`;
-            });
-        }
-    </script>
+            // If no skills found, give a default
+            if(extractedData.skills.length === 0) extractedData.skills = ["General Expertise"];
+
+            displayPortfolio(extractedData);
+        };
+
+        // Read the file as text
+        reader.readAsText(file);
+    }
+
+    function displayPortfolio(data) {
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('upload-zone').classList.add('hidden');
+        document.getElementById('portfolio-output').classList.remove('hidden');
+
+        document.getElementById('out-name').innerText = data.name;
+        document.getElementById('out-title').innerText = data.title;
+
+        const skillDiv = document.getElementById('out-skills');
+        skillDiv.innerHTML = ""; // Clear old data
+        data.skills.forEach(s => {
+            skillDiv.innerHTML += `<span class="bg-slate-700 px-3 py-1 rounded-md border border-sky-500/30 text-sky-400 text-sm">${s}</span>`;
+        });
+    }
+</script>
 </body>
 </html>
